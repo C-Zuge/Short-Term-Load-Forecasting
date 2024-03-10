@@ -20,8 +20,29 @@ def rmse(y_true, y_pred):
 
     return f'{rmse:.4f}'
 
+def UStatistic(targets, forecasts):
+    """
+    Theil's U Statistic
+
+    :param targets: 
+    :param forecasts: 
+    :return: 
+    """
+    l = len(targets)
+    if isinstance(targets, list):
+        targets = np.array(targets)
+    if isinstance(forecasts, list):
+        forecasts = np.array(forecasts)
+
+    naive = []
+    y = []
+    for k in np.arange(0, l - 1):
+        y.append(np.subtract(forecasts[k], targets[k]) ** 2)
+        naive.append(np.subtract(targets[k + 1], targets[k]) ** 2)
+    return np.sqrt(np.divide(np.sum(y), np.sum(naive)))
+
 def main(train_set,test_set,df):
-    ExpModel = ExponentialSmoothing(train_set,trend='additive',seasonal='multiplicative',seasonal_periods=365).fit()
+    ExpModel = ExponentialSmoothing(train_set,trend='additive',seasonal='multiplicative',seasonal_periods=7).fit()
 
     plt.figure()
     ExpModel.fittedvalues.plot()
@@ -33,9 +54,11 @@ def main(train_set,test_set,df):
     y_hat = ExpModel.forecast(len(test_set))
     MAPE = mape(test_set,y_hat)
     RMSE = rmse(test_set,y_hat)
+    U = UStatistic(test_set,y_hat)
     dictResult= {   'Name': 'Holt-Winters',
                     'RMSE': RMSE,
                     'SMAPE': MAPE,
+                    'Theils U': U,
                     }
     df = df.append(dictResult,ignore_index=True)
 

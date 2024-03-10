@@ -21,6 +21,27 @@ def rmse(y_true, y_pred):
 
     return f'{rmse:.4f}'
 
+def UStatistic(targets, forecasts):
+    """
+    Theil's U Statistic
+
+    :param targets: 
+    :param forecasts: 
+    :return: 
+    """
+    l = len(targets)
+    if isinstance(targets, list):
+        targets = np.array(targets)
+    if isinstance(forecasts, list):
+        forecasts = np.array(forecasts)
+
+    naive = []
+    y = []
+    for k in np.arange(0, l - 1):
+        y.append(np.subtract(forecasts[k], targets[k]) ** 2)
+        naive.append(np.subtract(targets[k + 1], targets[k]) ** 2)
+    return np.sqrt(np.divide(np.sum(y), np.sum(naive)))
+
 def ar(train_set,test_set,df):
     ar_model = AR(train_set,freq='D').fit(2)
     forecast = ar_model.params[0] + ar_model.params[1]*test_set.shift(1) + ar_model.params[2]*test_set.shift(2)
